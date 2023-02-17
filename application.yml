@@ -1,0 +1,12 @@
+api:
+  # OpenAi ChatGPT Token
+  token:
+  # Api
+  baseUrl: https://api.openai.com
+bot:
+  # 机器人Token
+  token:
+  # 机器人主人ID
+  owner:
+log:
+  level: info
