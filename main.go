@@ -15,8 +15,8 @@ func main() {
 		server.Logger.Info(fmt.Sprintf("[%d-%s] query reply: ", update.Message.From.ID, update.Message.From.UserName), answers)
 
 		if err != nil {
-			go server.SendMessage(update.Message.Chat.ID, config.ErrorMessage, &update.Message.MessageID)
-			go server.SendMessage(
+			server.SendMessage(update.Message.Chat.ID, config.ErrorMessage, &update.Message.MessageID)
+			server.SendMessage(
 				server.Bot.Owner,
 				fmt.Sprintf(
 					"[%d-%s] send message: %s, err: %s",
@@ -28,8 +28,8 @@ func main() {
 			)
 		} else {
 			if len(answers.Choices) < 1 {
-				go server.SendMessage(update.Message.Chat.ID, config.ErrorMessage, &update.Message.MessageID)
-				go server.SendMessage(
+				server.SendMessage(update.Message.Chat.ID, config.ErrorMessage, &update.Message.MessageID)
+				server.SendMessage(
 					server.Bot.Owner,
 					fmt.Sprintf(
 						"[%d-%s] send message: %s, err: %s",
@@ -43,7 +43,7 @@ func main() {
 				return
 			}
 
-			go server.SendMessage(
+			server.SendMessage(
 				update.Message.Chat.ID,
 				answers.Choices[0].ToText(),
 				&update.Message.MessageID,

@@ -63,6 +63,8 @@ func (server *Server) App() {
 
 func (server *Server) SendMessage(chatId int64, msg string, replyMessageId *int) {
 	message := tgbotapi.NewMessage(chatId, msg)
+	message.ParseMode = tgbotapi.ModeMarkdown
+	
 	if replyMessageId != nil {
 		message.ReplyToMessageID = *replyMessageId
 	}
