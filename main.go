@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	newServer := server.NewServer(func(server *server.Server, update *tgbotapi.Update) {
+	newServer := server.NewServer(func(server *server.Server, update tgbotapi.Update) {
 		text := update.Message.Text[5:]
 		answers, err := server.Api.OpenAIClient.Query(text)
 

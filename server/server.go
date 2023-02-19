@@ -30,7 +30,7 @@ type Server struct {
 	Bot      Bot `json:"bot"`
 	Log      Log `json:"log"`
 	Logger   *logrus.Logger
-	CallBack func(server *Server, update *tgbotapi.Update)
+	CallBack func(server *Server, update tgbotapi.Update)
 }
 
 func (server *Server) App() {
@@ -55,7 +55,7 @@ func (server *Server) App() {
 		if update.Message != nil {
 			server.Logger.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 			if len(update.Message.Text) > 5 && update.Message.Text[0:5] == "look " {
-				go server.CallBack(server, &update)
+				go server.CallBack(server, update)
 			}
 		}
 	}
@@ -64,7 +64,7 @@ func (server *Server) App() {
 func (server *Server) SendMessage(chatId int64, msg string, replyMessageId *int) {
 	message := tgbotapi.NewMessage(chatId, msg)
 	message.ParseMode = tgbotapi.ModeMarkdown
-	
+
 	if replyMessageId != nil {
 		message.ReplyToMessageID = *replyMessageId
 	}
@@ -75,7 +75,7 @@ func (server *Server) SendMessage(chatId int64, msg string, replyMessageId *int)
 	}
 }
 
-func NewServer(callback func(server *Server, update *tgbotapi.Update)) *Server {
+func NewServer(callback func(server *Server, update tgbotapi.Update)) *Server {
 	args := os.Args
 	if len(args) != 2 {
 		panic("not found config file")
