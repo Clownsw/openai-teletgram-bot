@@ -9,10 +9,15 @@ import (
 	"os"
 )
 
+type CallBack func(server *Server, update *tgbotapi.Update) (bool, error)
+type CallBackRetry func(server *Server, update tgbotapi.Update)
+
 type Api struct {
-	Token        string `yaml:"token"`
-	BaseUrl      string `yaml:"baseUrl"`
-	OpenAIClient *client.OpenAIClient
+	Token            string `yaml:"token"`
+	BaseUrl          string `yaml:"baseUrl"`
+	OpenAIClient     *client.OpenAIClient
+	MaxReplyCount    int32
+	SendErrorMessage bool
 }
 
 type Bot struct {
@@ -26,11 +31,12 @@ type Log struct {
 }
 
 type Server struct {
-	Api      Api `json:"api"`
-	Bot      Bot `json:"bot"`
-	Log      Log `json:"log"`
-	Logger   *logrus.Logger
-	CallBack func(server *Server, update tgbotapi.Update)
+	Api           Api `json:"api"`
+	Bot           Bot `json:"bot"`
+	Log           Log `json:"log"`
+	Logger        *logrus.Logger
+	CallBack      CallBack
+	CallBackRetry CallBackRetry
 }
 
 func (server *Server) App() {
@@ -55,7 +61,7 @@ func (server *Server) App() {
 		if update.Message != nil {
 			server.Logger.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 			if len(update.Message.Text) > 5 && update.Message.Text[0:5] == "look " {
-				go server.CallBack(server, update)
+				go server.CallBackRetry(server, update)
 			}
 		}
 	}
@@ -75,7 +81,7 @@ func (server *Server) SendMessage(chatId int64, msg string, replyMessageId *int)
 	}
 }
 
-func NewServer(callback func(server *Server, update tgbotapi.Update)) *Server {
+func NewServer(callback CallBack, callBackRetry CallBackRetry) *Server {
 	args := os.Args
 	if len(args) != 2 {
 		panic("not found config file")
@@ -86,7 +92,7 @@ func NewServer(callback func(server *Server, update tgbotapi.Update)) *Server {
 	if err != nil {
 		panic(err)
 	}
-	server := Server{}
+	server := new(Server)
 
 	err = yaml.Unmarshal(fileContent, &server)
 	if err != nil {
@@ -103,5 +109,6 @@ func NewServer(callback func(server *Server, update tgbotapi.Update)) *Server {
 	server.Api.OpenAIClient = client.NewOpenAIClient(config.NewOpenAIInfo(server.Api.Token, server.Api.BaseUrl))
 	server.Logger.SetLevel(level)
 	server.CallBack = callback
-	return &server
+	server.CallBackRetry = callBackRetry
+	return server
 }

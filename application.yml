@@ -3,6 +3,10 @@ api:
   token:
   # Api
   baseUrl: https://api.openai.com
+  # 最大重试次数
+  maxReplyCount: 3
+  # 发送错误信息到机器人主人
+  sendErrorMessage: true
 bot:
   # 机器人Token
   token:
