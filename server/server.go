@@ -108,6 +108,7 @@ func NewServer(callback CallBack, callBackRetry CallBackRetry) *Server {
 
 	server.Api.OpenAIClient = client.NewOpenAIClient(config.NewOpenAIInfo(server.Api.Token, server.Api.BaseUrl))
 	server.Logger.SetLevel(level)
+	server.Api.OpenAIClient.Logger = server.Logger
 	server.CallBack = callback
 	server.CallBackRetry = callBackRetry
 	return server

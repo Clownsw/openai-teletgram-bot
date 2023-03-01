@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/imroc/req/v3"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"openai-teletgram-bot/config"
 	"openai-teletgram-bot/domain/openai"
@@ -12,6 +13,7 @@ import (
 type OpenAIClient struct {
 	Client    *req.Client
 	ApiDomain string
+	Logger    *logrus.Logger
 }
 
 func (openAIClient *OpenAIClient) Query(query string) (*openai.Answers, error) {
@@ -24,6 +26,9 @@ func (openAIClient *OpenAIClient) Query(query string) (*openai.Answers, error) {
 	}
 
 	answers := openai.Answers{}
+
+	openAIClient.Logger.Info(fmt.Sprintf("query: %s, response: %s", query, response.String()))
+
 	err = json.Unmarshal([]byte(response.String()), &answers)
 	if err != nil {
 		return nil, err
