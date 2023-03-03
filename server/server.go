@@ -7,6 +7,7 @@ import (
 	"openai-teletgram-bot/client"
 	"openai-teletgram-bot/config"
 	"os"
+	"strings"
 )
 
 type CallBack func(server *Server, update *tgbotapi.Update) (bool, error)
@@ -67,7 +68,7 @@ func (server *Server) App() {
 	}
 }
 
-func (server *Server) SendMessage(chatId int64, msg string, replyMessageId *int) {
+func (server *Server) SendMessage(chatId int64, msg string, replyMessageId *int) error {
 	message := tgbotapi.NewMessage(chatId, msg)
 	message.ParseMode = tgbotapi.ModeMarkdown
 
@@ -77,8 +78,16 @@ func (server *Server) SendMessage(chatId int64, msg string, replyMessageId *int)
 
 	_, err := server.Bot.Bot.Send(message)
 	if err != nil {
-		server.Logger.Error("send message err: ", err.Error())
+
+		// Telegram Message Markdown error
+		if strings.Index(err.Error(), "can't parse entities") != -1 {
+			message.ParseMode = ""
+			_, _ = server.Bot.Bot.Send(message)
+			return nil
+		}
+		return err
 	}
+	return nil
 }
 
 func NewServer(callback CallBack, callBackRetry CallBackRetry) *Server {

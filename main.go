@@ -23,11 +23,14 @@ func main() {
 			return false, config.OpenAiQueryError
 		}
 
-		server.SendMessage(
+		err = server.SendMessage(
 			update.Message.Chat.ID,
 			answers.Choices[0].ToText(),
 			&update.Message.MessageID,
 		)
+		if err != nil {
+			return false, err
+		}
 
 		return true, nil
 	}, func(server *server.Server, update tgbotapi.Update) {
@@ -39,8 +42,17 @@ func main() {
 				break
 			}
 
+			server.Logger.Info(
+				fmt.Sprintf(
+					"messageId: %d, form: %d, counter: %d",
+					update.Message.MessageID,
+					update.Message.From.ID,
+					counter.Load(),
+				),
+			)
+
 			if counter.Load() >= server.Api.MaxReplyCount {
-				server.SendMessage(
+				_ = server.SendMessage(
 					update.Message.Chat.ID,
 					config.ErrorMessage,
 					&update.Message.MessageID,
@@ -49,7 +61,7 @@ func main() {
 			}
 
 			if server.Api.SendErrorMessage {
-				server.SendMessage(
+				_ = server.SendMessage(
 					server.Bot.Owner,
 					fmt.Sprintf(
 						"[%d-%s] send message: %s, err: %s",
