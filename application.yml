@@ -1,16 +1,23 @@
 api:
   # OpenAi ChatGPT Token
-  token:
+  token: s
+  
   # Api
   baseUrl: https://api.openai.com
+  
   # 最大重试次数
   maxReplyCount: 3
+
   # 发送错误信息到机器人主人
   sendErrorMessage: true
+
+  # 模型类型 openai or gpt
+  model: gpt
 bot:
   # 机器人Token
-  token:
+  token: 
+  
   # 机器人主人ID
-  owner:
+  owner: 
 log:
   level: info

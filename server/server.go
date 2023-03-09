@@ -1,13 +1,14 @@
 package server
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
 	"openai-teletgram-bot/client"
 	"openai-teletgram-bot/config"
 	"os"
 	"strings"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 )
 
 type CallBack func(server *Server, update *tgbotapi.Update) (bool, error)
@@ -16,9 +17,10 @@ type CallBackRetry func(server *Server, update tgbotapi.Update)
 type Api struct {
 	Token            string `yaml:"token"`
 	BaseUrl          string `yaml:"baseUrl"`
-	OpenAIClient     *client.OpenAIClient
-	MaxReplyCount    int32
-	SendErrorMessage bool
+	Client           client.Client
+	MaxReplyCount    int32  `yaml:"maxReplyCount"`
+	SendErrorMessage bool   `yaml:"sendErrorMessage"`
+	Model            string `yaml:"model"`
 }
 
 type Bot struct {
@@ -115,9 +117,9 @@ func NewServer(callback CallBack, callBackRetry CallBackRetry) *Server {
 		panic(err)
 	}
 
-	server.Api.OpenAIClient = client.NewOpenAIClient(config.NewOpenAIInfo(server.Api.Token, server.Api.BaseUrl))
+	server.Api.Client = client.NewClient(server.Api.Model, &config.AuthInfo{Token: server.Api.Token, BaseUrl: server.Api.BaseUrl})
 	server.Logger.SetLevel(level)
-	server.Api.OpenAIClient.Logger = server.Logger
+	server.Api.Client.SetLoggger(server.Logger)
 	server.CallBack = callback
 	server.CallBackRetry = callBackRetry
 	return server

@@ -2,30 +2,27 @@ package main
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"openai-teletgram-bot/config"
 	"openai-teletgram-bot/server"
 	"sync/atomic"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func main() {
 	newServer := server.NewServer(func(server *server.Server, update *tgbotapi.Update) (bool, error) {
 		text := update.Message.Text[5:]
-		answers, err := server.Api.OpenAIClient.Query(text)
+		result, err := server.Api.Client.Query(text)
 
 		if err != nil {
 			return false, err
 		}
 
-		server.Logger.Info(fmt.Sprintf("[%d-%s] query reply: ", update.Message.From.ID, update.Message.From.UserName), answers)
-
-		if len(answers.Choices) < 1 {
-			return false, config.OpenAiQueryError
-		}
+		server.Logger.Info(fmt.Sprintf("[%d-%s] query reply: ", update.Message.From.ID, update.Message.From.UserName), result)
 
 		err = server.SendMessage(
 			update.Message.Chat.ID,
-			answers.Choices[0].ToText(),
+			result,
 			&update.Message.MessageID,
 		)
 		if err != nil {
